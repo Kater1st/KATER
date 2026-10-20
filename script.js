@@ -1,27 +1,34 @@
-let menuIcon = document.querySelector('#menu-icon');
-let navbar = document.querySelector('.navbar');
-let sections = document.querySelector('section');
-let navLinks = document.querySelector('header nav a');
+const menuButton = document.querySelector('#menu-icon');
+const navbar = document.querySelector('.navbar');
+const navLinks = document.querySelectorAll('.navbar a');
+const sections = document.querySelectorAll('main section[id]');
+const year = document.querySelector('#year');
 
-window.onscroll = () => {
-     sections.forEach(sec => {
-        let top =window.scrollY;
-        let offset = sec.offseTop - 150;
-        let height = sec.offsetHeight;
-        let id = sec.getAttribute('id');
+if (year) year.textContent = new Date().getFullYear();
 
-        if(top >= offset && top < offset + height){
-            navLinks.forEach(links => {
-                links.classList.remove('active');
-                document.querySelector('header nav a [href*=' + id + ']').classlist.add('active')
-            })    
-        }
-    }) 
-}
+menuButton?.addEventListener('click', () => {
+  const isOpen = navbar.classList.toggle('active');
+  menuButton.setAttribute('aria-expanded', String(isOpen));
+  menuButton.setAttribute('aria-label', isOpen ? 'Close navigation' : 'Open navigation');
+  menuButton.querySelector('i').className = isOpen ? 'bx bx-x' : 'bx bx-menu';
+});
 
+navLinks.forEach((link) => {
+  link.addEventListener('click', () => {
+    navbar.classList.remove('active');
+    menuButton.setAttribute('aria-expanded', 'false');
+    menuButton.setAttribute('aria-label', 'Open navigation');
+    menuButton.querySelector('i').className = 'bx bx-menu';
+  });
+});
 
+const updateActiveLink = () => {
+  const currentSection = [...sections].reverse().find((section) => section.getBoundingClientRect().top <= 180);
+  navLinks.forEach((link) => {
+    const isCurrent = currentSection && link.getAttribute('href') === `#${currentSection.id}`;
+    link.classList.toggle('active', Boolean(isCurrent));
+  });
+};
 
-menuIcon.onclick = () => {
-    menuIcon.classList.toggle('bx-x');
-    navbar.classList.toggle('active');
-}
+window.addEventListener('scroll', updateActiveLink, { passive: true });
+updateActiveLink();
